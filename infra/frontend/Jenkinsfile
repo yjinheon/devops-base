@@ -1,0 +1,56 @@
+
+pipeline {
+    agent any
+    
+    triggers {
+        cron('TZ=Asia/Seoul\n0 4 * * *')
+    }
+
+    tools {
+        nodejs 'nodejs-v20'
+    }
+ 
+
+    stages {
+        stage('01 Clone Git Repository') {
+            steps {
+                  git branch: 'main', credentialsId: 'yjin-jenkins', url: 'some-frontend-repo'
+            }
+        }
+        stage('02 Build') {
+            steps {
+                sh '''
+                echo Start Build
+                '''
+                sh 'npm install'
+                sh 'npm run build'
+            }
+        }
+
+        stage('03 Publish') {
+            steps {
+sshPublisher(publishers: [sshPublisherDesc(configName: 'Dev-Server'
+                                           , transfers: [sshTransfer(
+                                           cleanRemote: false, excludes: ''
+                                           , execCommand: '''
+                                           cp -rf /home/some-user/temp/app-name/dist/* /var/www/html/app-name
+                                           rm -rf /home/some-user/temp/app-name'''
+                                           , execTimeout: 
+                                           , flatten: false
+                                           , makeEmptyDirs: false
+                                           , noDefaultExcludes: false
+                                           , patternSeparator: '[, ]+'
+                                           , remoteDirectory: '/temp/app-name'
+                                           , remoteDirectorySDF: false
+                                           , removePrefix: ''
+                                           , sourceFiles: 'dist/**')]
+                                           , usePromotionTimestamp: false
+                                           , useWorkspaceInPromotion: false
+                                           , verbose: true)])
+
+            }
+        }
+ 
+        
+    }
+}

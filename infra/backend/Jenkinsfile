@@ -1,0 +1,62 @@
+
+
+pipeline {
+    agent any
+    
+    triggers {
+        cron('TZ=Asia/Seoul\n0 6 * * *')
+    }
+    
+
+    stages {
+        stage('01 Clone Git Repository') {
+            steps {
+                git credentialsId: 'some-credential-id', url: 'some-api-repo-url'
+            }
+        }
+        stage('02 Build') {
+            tools {
+                jdk 'jdk-17'
+            }
+            steps {
+                sh 'echo convert to java 17'
+                sh 'echo JAVA_HOME is $JAVA_HOME'
+                sh 'echo PATH is $PATH'
+                sh 'java -version'
+                sh 'javac -version'
+                sh '''
+                echo Start Build
+                ./gradlew clean bootJar
+                '''
+            }
+        }
+
+        stage('03 Publish') {
+            steps {
+                        sshPublisher(publishers: [sshPublisherDesc(configName: 'Dev-Server'
+                          , transfers: [sshTransfer(cleanRemote: false
+                          , excludes: ''
+                          , execCommand: '''
+                          export JAVA_HOME=/opt/jdk-17
+                          export PATH=$JAVA_HOME/bin:$PATH
+                          java -version
+                          /home/some-user/deploy.sh
+                          '''
+                          , execTimeout: 600000
+                          , flatten: false
+                          , makeEmptyDirs: false
+                          , noDefaultExcludes: false
+                          , patternSeparator: '[, ]+'
+                          , remoteDirectory: 'temp3'
+                          , remoteDirectorySDF: false
+                          , removePrefix: ''
+                          , sourceFiles: '**/build/libs/*.jar')]
+                          , usePromotionTimestamp: false
+                          , useWorkspaceInPromotion: false
+                          , verbose: true)])
+            }
+        }
+ 
+        
+    }
+}
