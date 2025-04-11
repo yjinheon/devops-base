@@ -1,0 +1,14 @@
+apiVersion: projectcalico.org/v3
+kind: FelixConfiguration
+metadata:
+  creationTimestamp: "2025-03-29T00:37:33Z"
+  name: default
+  resourceVersion: "1282497"
+  uid: f7399dfb-86d8-4e03-93ce-0ffa5d5ba252
+spec:
+  bpfConnectTimeLoadBalancing: TCP
+  bpfHostNetworkedNATWithoutCTLB: Enabled
+  bpfLogLevel: ""
+  floatingIPs: Disabled
+  logSeverityScreen: Info
+  reportingInterval: 0s

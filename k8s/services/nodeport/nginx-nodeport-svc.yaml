@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-nodeport
+  namespace: default
+spec:
+  selector:
+    app: nginx #
+  type: NodePort #
+  ports:
+    - name: http
+      port: 80 # inner port
+      targetPort: 80 # target
+      nodePort: 30080 # 노드에 노출될 포트 (30000-32767)

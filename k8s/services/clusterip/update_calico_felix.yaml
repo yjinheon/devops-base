@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Felix 설정 확인
+calicoctl get felixconfiguration default -o yaml
+
+# Felix 설정 업데이트
+calicoctl apply -f felix-config.yaml
