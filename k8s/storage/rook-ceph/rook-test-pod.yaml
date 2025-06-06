@@ -9,9 +9,10 @@ spec:
       image: busybox
       command: ["/bin/sh", "-c"]
       args:
-        - while true; do
-          echo "$(date) - Writing to test file" >> /mnt/ceph/test.txt;
-          sleep 5;
+        - |
+          while true; do
+            echo "$(date) - Writing to test file" >> /mnt/ceph/test.txt;
+            sleep 5;
           done
       volumeMounts:
         - name: ceph-rbd-volume

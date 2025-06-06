@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: manual-rbd-pv
+  annotations:
+    pv.kubernetes.io/provisioned-by: rbd.csi.ceph.com
+spec:
+  capacity:
+    storage: 1Gi # PVC 요구사항과 일치하게 설정
+  accessModes:
+    - ReadWriteOnce # PVC 요구사항과 일치하게 설정
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: csi-rbd-sc # PVC의 StorageClass와 일치해야 함
+  csi:
+    driver: rbd.csi.ceph.com
+    fsType: ext4
+    volumeHandle: manual-rbd-volume-id-1 # 고유한 ID 설정
+    volumeAttributes:
+      pool: replicapool # 여기에 실제 RBD 풀 이름 입력
+      clusterID: rook-ceph # ConfigMap에서 확인한 클러스터 ID
+      staticVolume: "true"
+      imageFeatures: layering
