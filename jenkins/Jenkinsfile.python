@@ -1,0 +1,129 @@
+
+pipeline {
+    agent any
+    environment {
+        // uv
+        UV_CACHE_DIR = "${WORKSPACE}/.uv-cache"
+        UV_PROJECT_ENVIRONMENT = "${WORKSPACE}/.venv"
+        PATH = "$HOME/.cargo/bin:$PATH"
+        // gitlab
+        GITLAB_REPO_URL = "http://192.168.0.12:8929/jinheonyoon/llm-backend.git"
+        GITLAB_SERVER = "192.168.0.12"
+        // app
+        APP_PORT = "5000"
+        APP_HOST = "0.0.0.0"
+        APP_ENV = "production"
+    }
+    
+    triggers {
+        cron('TZ=Asia/Seoul\n0 4 * * *')
+    }
+    
+    stages {
+        stage('01 Clone Git Repository') {
+            steps {
+
+                git branch: 'main', 
+                    credentialsId: 'gitlab_token_jh', 
+                    url: "${env.GITLAB_REPO_URL}"
+            }
+        }
+        
+       stage('02 Code Validataion') {
+            steps {
+                sh '''
+                echo "=== Code Validation ==="
+                echo "Checking Python syntax..."
+                # use mypy ...
+       
+                # check  project files
+                echo "Checking project files..."
+                [ -f "pyproject.toml" ] && echo "✓ pyproject.toml found" || echo "⚠ pyproject.toml missing"
+                [ -f "uv.lock" ] && echo "✓ uv.lock found" || echo "⚠ uv.lock missing"
+                
+                
+                echo "=== Jenkins Workspace File Check ==="
+                echo "Current directory: $(pwd)"
+                echo "All files in workspace:"
+                find . -type f -name "*.py" -o -name "*.toml" -o -name "*.lock" | head -20
+                
+                echo "=== Specific file check ==="
+                [ -f "app/main.py" ] && echo "✓ app/main.py exists" || echo "✗ app/main.py missing"
+                [ -f "server.py" ] && echo "✓ server.py exists" || echo "✗ server.py missing"
+                [ -f "pyproject.toml" ] && echo "✓ pyproject.toml exists" || echo "✗ pyproject.toml missing"
+                [ -f "uv.lock" ] && echo "✓ uv.lock exists" || echo "✗ uv.lock missing"
+                
+                echo "Validation completed - ready for deployment"
+                echo "Environment setup completed"
+                '''
+            }
+        }
+        
+        stage('02 Simple SSH Test') {
+            steps {
+                sshPublisher(publishers: [sshPublisherDesc(
+                    configName: 'Dev-Server',
+                    transfers: [sshTransfer(
+                        execCommand: '''
+                        echo "=== Simple SSH Test ==="
+                        echo "Current user: $(whoami)"
+                        echo "Current directory: $(pwd)"
+                        echo "Home directory: $HOME"
+                        echo "Python version: $(python3 --version)"
+                        
+                        # 디렉토리 확인
+                        echo "Checking target directory..."
+                        ls -ld /app/ 2>/dev/null || echo "/app not found"
+                        ls -ld /app/llm 2>/dev/null || echo "/app/llm not found"
+                        
+                        # 디렉토리 생성 시도
+                        echo "Creating directories if needed..."
+                        # sudo mkdir -p /app/llm/backend || mkdir -p /app/llm/backend || echo "Cannot create directory"
+                        
+                        sudo mkdir -p /app/llm/backend
+                        sudo chown $(whoami):$(whoami) /app/llm/backend
+                        
+                        echo "=== SSH Test Completed ==="
+                        ''',
+                        execTimeout: 60000
+                    )]
+                )])
+            }
+            
+        }
+            
+            
+        stage('03 File Transfer Test') {
+            steps {
+                sshPublisher(publishers: [sshPublisherDesc(
+                    configName: 'Dev-Server',
+                    transfers: [sshTransfer(
+                        cleanRemote: false,
+                        flatten: false,
+                        makeEmptyDirs: true,
+                        noDefaultExcludes: false,
+                        removePrefix: '',
+                        sourceFiles: '**/*',
+                        remoteDirectory: '/app/llm',
+                        execCommand: '''
+                        set -ex
+                        echo "=== File Transfer Test ==="
+                        echo "Current user: $(whoami)"
+                        echo "Current directory: $(pwd)"
+                        echo "Target directory exists: $(ls -ld /app/llm 2>/dev/null || echo 'NOT FOUND')"
+                            
+                        cd /app/llm || { echo "Cannot access /app/llm"; exit 1; }
+                        echo "Files in target directory:"
+                        ls -la
+                        echo "File count: $(find . -type f | wc -l)"
+                        echo "=== Transfer Test Completed ==="
+                        ''',
+                        execTimeout: 60000
+                    )]
+                )])
+            }
+        }
+            
+    }
+
+}

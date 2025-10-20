@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+    
+    environment {
+        REGISTRY_URL = 'localhost:30500'
+        APP_NAME = 'my-spring-app'
+        KUBECONFIG = credentials('kubeconfig')
+    }
+    
+    stages {
+        stage('Build') {
+            steps {
+                sh './gradlew clean bootJar --no-daemon'
+            }
+        }
+        
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    def imageTag = "${APP_NAME}:${BUILD_NUMBER}"
+                    sh "docker build -t ${REGISTRY_URL}/${imageTag} ."
+                    sh "docker push ${REGISTRY_URL}/${imageTag}"
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                script {
+                    sh """
+                        kubectl set image deployment/my-spring-app \
+                        spring-app=${REGISTRY_URL}/${APP_NAME}:${BUILD_NUMBER}
+                        
+                        kubectl rollout status deployment/my-spring-app
+                    """
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,239 @@
+pipeline {
+    agent any
+    
+    environment {
+        // uv 환경 설정
+        UV_CACHE_DIR = "${WORKSPACE}/.uv-cache"
+        UV_PROJECT_ENVIRONMENT = "${WORKSPACE}/.venv"
+        PATH = "$HOME/.cargo/bin:$PATH"
+        
+        // FastAPI 애플리케이션 설정
+        APP_PORT = "8000"
+        APP_HOST = "0.0.0.0"
+        APP_ENV = "production"
+    }
+    
+    triggers {
+        // 매일 새벽 4시 (서울 시간) 자동 실행
+        cron('TZ=Asia/Seoul\n0 4 * * *')
+    }
+    
+    stages {
+        stage('01 Clone Git Repository') {
+            steps {
+                // GitLab SSH 호스트 키 등록
+                sh "ssh-keyscan -p 2222 ${env.GITLAB_SERVER} >> ~/.ssh/known_hosts"
+                
+                // GitLab private repository 클론
+                git branch: 'main', 
+                    credentialsId: 'gitlab_ssh', 
+                    url: "${env.GITLAB_URL}/scv/cc-scv.git"
+            }
+        }
+        
+        stage('02 Setup Python Environment') {
+            steps {
+                sh '''
+                echo "=== Python Environment Setup ==="
+                echo "Timestamp: $(date)"
+                echo "Working directory: $(pwd)"
+                
+                # Python 버전 확인
+                python3 --version
+                
+                # uv 설치 확인 및 설치
+                if ! command -v uv &> /dev/null; then
+                    echo "Installing uv..."
+                    curl -LsSf https://astral.sh/uv/install.sh | sh
+                    export PATH="$HOME/.cargo/bin:$PATH"
+                else
+                    echo "uv already installed"
+                fi
+                
+                # uv 버전 확인
+                uv --version
+                echo "Environment setup completed"
+                '''
+            }
+        }
+        
+        stage('03 Build and Test') {
+            steps {
+                sh '''
+                set -e  # 에러 발생 시 즉시 중단
+                
+                echo "=== FastAPI Build Process ==="
+                echo "Build started: $(date)"
+                
+                # 이전 빌드 산출물 정리
+                echo "Cleaning previous build artifacts..."
+                rm -rf .venv __pycache__ .pytest_cache .coverage
+                
+                # 프로젝트 구조 검증
+                echo "Validating project structure..."
+                if [ ! -f "pyproject.toml" ]; then
+                    echo "Error: pyproject.toml not found!"
+                    exit 1
+                fi
+                
+                echo "Project files found:"
+                ls -la pyproject.toml uv.lock 2>/dev/null || echo "Some project files missing"
+                
+                # 의존성 설치
+                echo "Installing dependencies with uv..."
+                uv sync --frozen
+                
+                # 설치된 패키지 확인
+                echo "Installed packages:"
+                uv pip list
+                
+                # 코드 품질 검사 (선택적)
+                if uv pip show ruff >/dev/null 2>&1; then
+                    echo "Running code quality checks..."
+                    uv run ruff check src/ || echo "Linting issues found (non-blocking)"
+                fi
+                
+                # 테스트 실행 (선택적)
+                if [ -d "tests" ]; then
+                    echo "Running tests..."
+                    uv run pytest tests/ --tb=short -v
+                else
+                    echo "No tests directory found, skipping tests"
+                fi
+                
+                # 애플리케이션 검증
+                echo "Validating FastAPI application..."
+                uv run python -m py_compile src/main.py
+                uv run python -c "
+                try:
+                    from src.main import app
+                    print('✓ FastAPI application validation successful')
+                except Exception as e:
+                    print(f'✗ Application validation failed: {e}')
+                    exit(1)
+                "
+                
+                echo "=== Build completed successfully ==="
+                echo "Build finished: $(date)"
+                '''
+            }
+        }
+        
+        stage('04 Deploy to Server') {
+            steps {
+                sshPublisher(publishers: [sshPublisherDesc(
+                    configName: 'Dev-Server',
+                    transfers: [sshTransfer(
+                        // 파일 전송 설정
+                        cleanRemote: false,
+                        excludes: '''
+                        __pycache__/**,
+                        *.pyc,
+                        .pytest_cache/**,
+                        .venv/**,
+                        .git/**,
+                        *.log,
+                        .coverage,
+                        .ruff_cache/**,
+                        node_modules/**
+                        ''',
+                        flatten: false,
+                        makeEmptyDirs: true,
+                        noDefaultExcludes: false,
+                        patternSeparator: '[, ]+',
+                        remoteDirectory: '/app/scv/cc-scv',
+                        removePrefix: '',
+                        sourceFiles: '''
+                        src/**,
+                        pyproject.toml,
+                        uv.lock,
+                        *.py,
+                        scripts/**,
+                        config/**
+                        ''',
+                        
+                        // 배포 실행 명령
+                        execCommand: '''
+                        set -e
+                        cd /app/scv/cc-scv
+                        
+                        echo "=== FastAPI Deployment Started ==="
+                        echo "Deployment timestamp: $(date)"
+                        echo "Deployed from Jenkins build: $BUILD_NUMBER"
+                        
+                        # uv 환경 확인 및 설치
+                        if ! command -v uv &> /dev/null; then
+                            echo "Installing uv on remote server..."
+                            curl -LsSf https://astral.sh/uv/install.sh | sh
+                            export PATH="$HOME/.cargo/bin:$PATH"
+                        else
+                            echo "uv found: $(uv --version)"
+                        fi
+                        
+                        # 의존성 설치
+                        echo "Installing dependencies on remote server..."
+                        uv sync --frozen
+                        
+                        # 애플리케이션 검증
+                        echo "Validating deployed application..."
+                        uv run python -c "
+                        try:
+                            from src.main import app
+                            print('✓ Remote application validation successful')
+                        except Exception as e:
+                            print(f'✗ Remote validation failed: {e}')
+                            exit(1)
+                        "
+                        
+                        # 배포 스크립트 실행
+                        echo "Executing deployment script..."
+                        if [ -f "deploy.sh" ]; then
+                            chmod +x deploy.sh
+                            bash -x deploy.sh
+                        else
+                            echo "Warning: deploy.sh not found"
+                            echo "Manual service restart may be required"
+                        fi
+                        
+                        # 배포 완료 확인
+                        sleep 3
+                        if pgrep -f "uvicorn.*main:app" > /dev/null; then
+                            echo "✓ FastAPI service is running"
+                        else
+                            echo "⚠ FastAPI service status unknown"
+                        fi
+                        
+                        echo "=== Deployment Completed Successfully ==="
+                        echo "Completion timestamp: $(date)"
+                        ''',
+                        execTimeout: 300000
+                    )]
+                )])
+            }
+        }
+    }
+    
+    post {
+        always {
+            // 빌드 결과에 관계없이 항상 실행
+            sh '''
+            echo "=== Pipeline Cleanup ==="
+            # 캐시 정리 (선택적)
+            # rm -rf ${UV_CACHE_DIR}
+            echo "Cleanup completed"
+            '''
+        }
+        
+        success {
+            echo "✅ Pipeline completed successfully!"
+        }
+        
+        failure {
+            echo "❌ Pipeline failed. Check logs for details."
+        }
+        
+        unstable {
+            echo "⚠️ Pipeline completed with warnings."
+        }
+    }
+}
