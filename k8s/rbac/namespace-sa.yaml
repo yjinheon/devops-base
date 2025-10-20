@@ -1,0 +1,5 @@
+apiVersion: v2
+kind: ServiceAccount
+metadata:
+  name: wordpress-sa
+  namespace: wordpress

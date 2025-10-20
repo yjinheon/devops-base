@@ -1,0 +1,14 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: wordpress-namespace-full-access
+  namespace: wordpress
+rules:
+  - apiGroups: ["", "extensions", "apps"] # 리소스가 속한 api group 명시
+    resources: ["*"]
+    verbs: ["*"] # 리소스의 생성, 조회 등의 특정 권한을 동사 형태로 지정. create, get 등
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: ["*"]
