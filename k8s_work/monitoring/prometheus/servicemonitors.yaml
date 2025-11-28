@@ -1,0 +1,118 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: apim-gateway-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: apim-gateway
+  endpoints:
+    - port: metrics
+      path: /actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: apim-gateway
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cc-backend-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: cc-backend
+  endpoints:
+    - port: metrics
+      path: /stml/actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: cc
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scv-engine-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: scv-engine
+  endpoints:
+    - port: metrics
+      path: /scv/actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: scv-engine
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: apim-server-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: apim-server
+  endpoints:
+    - port: metrics
+      path: /apim/actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: apim-server
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dynapi-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: dynapi
+  endpoints:
+    - port: metrics
+      path: /actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: dynapi
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: apim-auth-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: apim-auth
+  endpoints:
+    - port: metrics
+      path: /actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: apim-auth

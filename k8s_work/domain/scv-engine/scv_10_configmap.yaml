@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scv-engine-config
+  namespace: scv
+data:
+  # Server Configuration
+  SERVER_PORT: "8877"
+  SERVER_BASE_URL: "http://0.0.0.0"
+  SERVER_CONTEXT_PATH: "/scv"
+  # Management Configuration
+  MANAGEMENT_ENDPOINTS: health,info,prometheus
+  # Logging Configuration
+  LOGGING_FILE_NAME: ""
+  LOGGING_FILE_PATH: ""
+  LOG_PATH: "" # 로그 경로는 비워둠 (mount 불필요)
+  # Logback 디버그 모드 OFF
+  LOGGING_DEBUG: "false"
+  # 콘솔 로그 패턴(JSON)
+  LOGGING_PATTERN_CONSOLE: >-
+    {"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%5p","service":"scv-engine",
+     "thread":"%t","logger":"%c{36}","message":"%replace(%msg){'\n','\\\\n'}"}%n

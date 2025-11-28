@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-agent-config
+  namespace: monitoring
+data:
+  agent.yaml: |
+    server:
+      log_level: info
+      log_format: json
+
+    # ===== Loki 로그 수집 =====
+    loki:
+      configs:
+        - name: scv-logs
+          # 로그 오프셋 저장 파일
+          positions:
+            filename: /var/lib/grafana-agent/positions.yaml
+
+          clients:
+            - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+
+          scrape_configs:
+            # --- Kubernetes Pod 로그 ---
+            - job_name: kubernetes-pods
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names: ["scv"]
+
+              # 로그 본문(JSON)에서 필드 추출 후 라벨로 승격
+              pipeline_stages:
+                - json:
+                    expressions:
+                      level: level
+                      message: message
+                      service: service
+                - labels:
+                    level:
+                    service:
+
+              relabel_configs:
+                # (1) 네임스페이스 필터: scv만
+                - source_labels: [__meta_kubernetes_namespace]
+                  regex: scv
+                  action: keep
+
+                # (2) 같은 노드의 파드만 수집 (DaemonSet 특성)
+                #- source_labels: [__meta_kubernetes_pod_node_name]
+                #  regex: ${HOSTNAME}
+                #  action: keep
+
+                # (3) 메타데이터 → 쿼리용 라벨
+                - source_labels: [__meta_kubernetes_namespace]
+                  target_label: namespace
+                - source_labels: [__meta_kubernetes_pod_name]
+                  target_label: pod
+                - source_labels: [__meta_kubernetes_pod_container_name]
+                  target_label: container
+                - source_labels: [__meta_kubernetes_pod_label_app]
+                  target_label: app
+                # (선택) app → job (원하면 유지)
+                - source_labels: [__meta_kubernetes_pod_label_app]
+                  target_label: job
+
+                # (4) ★ 실제 로그 파일 경로 지정(필수)
+                #     /var/log/pods/<podUID>/<container>/*.log
+                - action: replace
+                  source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
+                  separator: /
+                  regex: (.*)/(.*)
+                  replacement: /var/log/pods/*$1/*$2/*.log
+                  target_label: __path__

@@ -1,0 +1,173 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: scv
+data:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # default.conf (frontend proxy for: SPA static, API Gateway, CC backend)
+  # 목적
+  #  - 모든 요청은 "프런트 인그레스 호스트"로만 남도록 강제
+  #  - 백엔드가 절대 Location(https://1.215.230.34/...)을 내려도 현재 호스트로 재작성
+  #  - 프록시 체인 환경에서 절대 URL/CSRF/CORS 판단이 정확해지도록 X-Forwarded-* 보강
+  #  - (임시) CORS 프리플라이트 OPTIONS 204 허용 가능 (필요 시 활성화)
+  # 주의
+  #  - 브라우저는 도메인 사용 권장(인증서/SNI). IP 접근은 테스트 용도로만.
+  # ─────────────────────────────────────────────────────────────────────────────
+  default.conf: |
+    server {
+      listen 80;
+      server_name _;
+
+      # ───────────────────────────────────────────────────────────────────
+      # 공통 설정: 절대리다이렉트/쿠키/헤더 관련 안전장치 (변수/지도 등의 상단 공통 선언은 불가하므로 각 location에 개별 지정)
+      # ───────────────────────────────────────────────────────────────────
+
+      # ───────────────────────────────────────────────────────────────────
+      # 1) Static (Azure Storage) - Vue SPA 정적자원
+      #   - SPA 라우트 보호: 404는 index.html로 내부 리라이트
+      #   - 프록시 체인용 헤더 보강
+      # ───────────────────────────────────────────────────────────────────
+      location / {
+        proxy_pass https://scvwebsa01.z12.web.core.windows.net;
+        proxy_set_header Host scvwebsa01.z12.web.core.windows.net;
+        proxy_ssl_server_name on;
+        proxy_http_version 1.1;
+
+        # 체인 식별/절대URL 보정 자료
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Port  $server_port;
+
+        # SPA: 미매칭 라우트는 index.html
+        proxy_intercept_errors on;
+        error_page 404 = /index.html;
+      }
+
+      # ───────────────────────────────────────────────────────────────────
+      # 2) API Gateway
+      #   - 백엔드가 절대 Location 헤더를 내려도 현재 호스트로 강제 재작성
+      #   - 프록시 체인용 헤더 보강
+      # ───────────────────────────────────────────────────────────────────
+      location /gateway/ {
+        proxy_pass http://apim-gateway:8888/;
+
+        # 프록시 체인 헤더(절대 URL/보안판단 정확화)
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        # 업스트림이 절대 Location을 내려도 현재 스킴/호스트로 강제
+        # (특정 IP로만 오던 것을 일반화하여 "아무 호스트" -> "현재 호스트"로 변환)
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+
+        # 필요 시 쿠키 도메인/경로 보정 (주석 해제해서 사용)
+        # proxy_cookie_domain 1.215.230.34 $host;
+        # proxy_cookie_path   /            /gateway;
+
+        # 응답 헤더 정리 (불필요 민감 헤더 숨김)
+        proxy_hide_header Vary;
+        proxy_hide_header X-Gateway-ID;
+        add_header Vary "Origin" always;
+
+        # (선택) CORS 프리플라이트 임시 허용 - 진짜 크로스사이트가 필요 없으면 끄는 게 정석
+        # if ($request_method = OPTIONS) {
+        #   add_header Access-Control-Allow-Origin      $http_origin always;
+        #   add_header Access-Control-Allow-Methods     "GET,POST,PUT,DELETE,OPTIONS" always;
+        #   add_header Access-Control-Allow-Headers     $http_access_control_request_headers always;
+        #   add_header Access-Control-Allow-Credentials "true" always;
+        #   add_header Access-Control-Max-Age           86400 always;
+        #   return 204;
+        # }
+      }
+
+      # ───────────────────────────────────────────────────────────────────
+      # 3) CC Backend
+      #   - 서브패스(/cc) 인지 표시(X-Forwarded-Prefix)로 Spring 리다이렉트 보정
+      #   - 절대 Location -> 현재 호스트로 재작성
+      #   - 필요 시 Set-Cookie 도메인/경로 보정
+      # ───────────────────────────────────────────────────────────────────
+      location /cc/ {
+        proxy_pass http://cc-backend:2790/;
+
+        # 프록시 서브패스 인지 (Spring redirect, 링크 생성 보정)
+        proxy_set_header X-Forwarded-Prefix /cc;
+
+        # 프록시 체인 헤더
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        # 절대 Location 재작성 (백엔드가 1.215.230.34 등으로 내려도 현재 호스트 유지)
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+
+        # 필요 시 쿠키 보정 (Domain/Path)
+        # proxy_cookie_domain 1.215.230.34 $host;
+        # proxy_cookie_path   /            /cc;
+
+        # (옵션) 진짜 크로스사이트가 필요할 때만 프리플라이트 허용
+        # if ($request_method = OPTIONS) {
+        #   add_header Access-Control-Allow-Origin      $http_origin always;
+        #   add_header Access-Control-Allow-Methods     "GET,POST,PUT,DELETE,OPTIONS" always;
+        #   add_header Access-Control-Allow-Headers     $http_access_control_request_headers always;
+        #   add_header Access-Control-Allow-Credentials "true" always;
+        #   add_header Access-Control-Max-Age           86400 always;
+        #   return 204;
+        # }
+      }
+
+      # ───────────────────────────────────────────────────────────────────
+      # 4) testapi / openapi (게이트웨이 프록시)
+      #   - /cc가 아닌 별도 서브패스라면 X-Forwarded-Prefix 값을 경로와 일치시켜야 함
+      # ───────────────────────────────────────────────────────────────────
+      location /testapi/ {
+        proxy_pass http://apim-gateway:8888/;
+
+        # 필요 시 /testapi 로 지정 (현재는 /cc로 되어 있던 것을 수정)
+        proxy_set_header X-Forwarded-Prefix /testapi;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+      }
+
+      location /openapi/ {
+        proxy_pass http://apim-gateway:8888/;
+
+        proxy_set_header X-Forwarded-Prefix /openapi;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+      }
+
+      # ───────────────────────────────────────────────────────────────────
+      # Health
+      # ───────────────────────────────────────────────────────────────────
+      location /healthz {
+        return 200 "OK\n";
+        add_header Content-Type text/plain;
+      }
+    }

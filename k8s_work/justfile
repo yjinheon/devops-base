@@ -1,0 +1,186 @@
+# =======================
+# Justfile — Loki/Grafana/Prometheus smoke & checks
+# =======================
+
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+
+# --------
+# Vars 
+# --------
+NS:=env_var_or_default("NS","scv")
+APP          := env_var_or_default("APP","apim-gateway")
+CONTAINER    := env_var_or_default("CONTAINER","")             # 비우면 파드의 첫 번째 컨테이너
+LIMIT        := env_var_or_default("LIMIT","100")
+RANGE_MIN    := env_var_or_default("RANGE_MIN", "5")            # 분 단위
+
+# Loki
+LOKI_NS      := env_var_or_default("LOKI_NS",      "monitoring")
+LOKI_SVC     := env_var_or_default("LOKI_SVC",     "loki")
+LOKI_PORT    := env_var_or_default("LOKI_PORT",    "3100")
+LOKI_URL     := env_var_or_default("LOKI_URL",     "http://127.0.0.1:"+LOKI_PORT)
+
+# Prometheus
+PROM_NS      := env_var_or_default("PROM_NS",      "monitoring")
+PROM_SVC     := env_var_or_default("PROM_SVC",     "prometheus-kube-prometheus-prometheus")
+PROM_PORT    := env_var_or_default("PROM_PORT",    "9090")
+PROM_URL     := env_var_or_default("PROM_URL",     "http://127.0.0.1:"+PROM_PORT)
+
+# Grafana
+GRAFANA_NS   := env_var_or_default("GRAFANA_NS",   "monitoring")
+GRAFANA_SVC  := env_var_or_default("GRAFANA_SVC",  "grafana")
+GRAFANA_PORT := env_var_or_default("GRAFANA_PORT", "3000")
+GRAFANA_WEB := env_var_or_default("GRAFANA_WEB", "80")
+GRAFANA_URL  := env_var_or_default("GRAFANA_URL",  "http://127.0.0.1:"+GRAFANA_PORT)
+
+# Grafana Agent (logs/promtail 모듈 상태/메트릭 확인)
+AGENT_LABEL  := env_var_or_default("AGENT_LABEL",  "app=grafana-agent")
+AGENT_PORT   := env_var_or_default("AGENT_PORT",   "12345")
+# Agent 상태 API  /agent/api/v1/logs/targets 등
+AGENT_URL    := env_var_or_default("AGENT_URL",    "http://127.0.0.1:"+AGENT_PORT)
+
+# =======================
+# Port-forward group
+# =======================
+
+# pf-loki: 로컬 3100에 Loki 포워딩
+pf-loki:
+	@echo "→ Port-forward Loki {{LOKI_NS}}/svc/{{LOKI_SVC}} to :{{LOKI_PORT}}"
+	kubectl -n {{LOKI_NS}} port-forward svc/{{LOKI_SVC}} {{LOKI_PORT}}:{{LOKI_PORT}}
+
+# pf-prom: 로컬 9090에 Prometheus 포워딩
+pf-prom:
+	@echo "→ Port-forward Prometheus {{PROM_NS}}/svc/{{PROM_SVC}} to :{{PROM_PORT}}"
+	kubectl -n {{PROM_NS}} port-forward svc/{{PROM_SVC}} {{PROM_PORT}}:{{PROM_PORT}}
+
+# pf-grafana: 로컬 3000에 Grafana 포워딩
+pf-grafana:
+	@echo "→ Port-forward Grafana {{GRAFANA_NS}}/svc/{{GRAFANA_SVC}} to :{{GRAFANA_PORT}}"
+	kubectl -n {{GRAFANA_NS}} port-forward svc/{{GRAFANA_SVC}} {{GRAFANA_PORT}}:{{GRAFANA_WEB}}
+
+# pf-agent: 에이전트(로그 모듈) 상태 API/메트릭 확인용 포워딩
+pf-agent:
+	@echo "→ Port-forward Grafana Agent ({{AGENT_LABEL}}) to :{{AGENT_PORT}}"
+	AGENT_POD="$$(kubectl -n {{LOKI_NS}} get pod -l {{AGENT_LABEL}} -o jsonpath='{.items[0].metadata.name}')";
+	echo "   pod=$$AGENT_POD"
+	kubectl -n {{LOKI_NS}} port-forward pod/$$AGENT_POD {{AGENT_PORT}}:{{AGENT_PORT}}
+
+# =======================
+# Smoke log generators
+# =======================
+
+# smoke-exec: 대상 파드 컨테이너로 들어가 stdout에 JSON 라인 20줄 출력
+# 사용 전: APOD를 자동탐색하거나 환경변수로 지정 가능 (첫 번째 파드/컨테이너 사용)
+smoke-exec:
+	@echo "→ Emit JSON logs into an existing pod in {{NS}} with label app={{APP}}"
+	APOD="$$(kubectl -n {{NS}} get pod -l app={{APP}} -o jsonpath='{.items[0].metadata.name}')";
+	CON="{{CONTAINER}}"; [[ -z "$$CON" ]] && CON="$$(kubectl -n {{NS}} get pod $$APOD -o jsonpath='{.spec.containers[0].name}')";
+	echo "   pod=$$APOD container=$$CON"
+	kubectl -n {{NS}} exec -it $$APOD -c $$CON -- sh -lc 'for i in $$(seq 1 20); do echo "{\"level\":\"INFO\",\"service\":\"{{APP}}\",\"message\":\"smoke-test #$$i\"}"; sleep 0.3; done'
+
+# smoke-busybox: 임시 busybox 파드를 띄워 stdout에 JSON 라인 30줄 출력 (app 라벨은 {{APP}})
+smoke-busybox:
+	@echo "→ Run ephemeral busybox to emit logs (ns={{NS}}, app={{APP}})"
+	kubectl -n {{NS}} run log-smoke --restart=Never --image=busybox:1.36 --labels app={{APP}} -- \
+	  sh -lc 'i=1; while [ $$i -le 30 ]; do echo "{\"level\":\"INFO\",\"service\":\"{{APP}}\",\"message\":\"smoke-test #$$i\"}"; i=$$((i+1)); sleep 1; done' || true
+	@echo "→ Cleanup"
+	kubectl -n {{NS}} delete pod log-smoke --ignore-not-found
+
+# =======================
+# Loki query suite (포워딩된 상태에서 실행)
+# =======================
+
+# 내부: 타임스탬프(ns) 범위 계산
+_ts:
+	START_NS="$$(($(date +%s -d '-{{RANGE_MIN}} min')*1000000000))"; \
+	END_NS="$$(($(date +%s)*1000000000))"; \
+	echo "START_NS=$$START_NS"; echo "END_NS=$$END_NS" > .ts.env
+
+# ff-loki: Ready 체크 + 기본 라벨/시리즈/라인 쿼리 풀세트
+ff-loki: _ts
+	@echo "→ Loki /ready"
+	curl -sS {{LOKI_URL}}/ready || true
+	@echo
+	@echo "→ label values: job ({{RANGE_MIN}}m)"
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/label/job/values' \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+	@echo
+	@echo "→ series in ns={{NS}} ({{RANGE_MIN}}m)"
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/series' \
+	  --data-urlencode 'match[]={namespace="{{NS}}"}' \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+	@echo
+	@echo "→ last lines for ns={{NS}}, app={{APP}} (limit={{LIMIT}})"
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/query_range' \
+	  --data-urlencode 'query={namespace="{{NS}}",app="{{APP}}"}' \
+	  --data-urlencode limit={{LIMIT}} --data-urlencode direction=BACKWARD \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+	@echo
+	@echo "→ count_over_time sum ({{RANGE_MIN}}m) — pipeline 포함"
+	# 파이프라인이 있으면 괄호필수!
+	curl -GsS '{{LOKI_URL}}/loki/api/v1/query' \
+	  --data-urlencode 'query=sum(count_over_time(({namespace="{{NS}}",app="{{APP}}"} | json)[{{RANGE_MIN}}m]))' | jq -r .
+
+# loki-stream-pod: 특정 파드/컨테이너 라인 보기 (env: POD=..., CON=...)
+loki-stream-pod: _ts
+	@[[ -n "$$POD" ]] || (echo "set POD and optionally CON env"; exit 1)
+	: $${CON:=}
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/query_range' \
+	  --data-urlencode "query={namespace=\"{{NS}}\",pod=\"$$POD\"$${CON:+,container=\"$$CON\"}}" \
+	  --data-urlencode limit={{LIMIT}} --data-urlencode direction=BACKWARD \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+
+# loki-jobs: 최근 {{RANGE_MIN}}분 내 존재하는 job 라벨 값
+loki-jobs: _ts
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/label/job/values' \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+
+# loki-series-ns: 네임스페이스 단위 시리즈 나열
+loki-series-ns: _ts
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/series' \
+	  --data-urlencode 'match[]={namespace="{{NS}}"}' \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+
+# loki-lines-app: 앱 라벨로 라인 조회
+loki-lines-app: _ts
+	. .ts.env; curl -GsS '{{LOKI_URL}}/loki/api/v1/query_range' \
+	  --data-urlencode 'query={namespace="{{NS}}",app="{{APP}}"} | json' \
+	  --data-urlencode limit={{LIMIT}} --data-urlencode direction=BACKWARD \
+	  --data-urlencode start=$$START_NS --data-urlencode end=$$END_NS | jq -r .
+
+# loki-count-app: 앱 라벨로 count_over_time 합계
+loki-count-app:
+	curl -GsS '{{LOKI_URL}}/loki/api/v1/query' \
+	  --data-urlencode 'query=sum(count_over_time(({namespace="{{NS}}",app="{{APP}}"} | json)[{{RANGE_MIN}}m]))' | jq -r .
+
+# =======================
+# Agent 상태 / 메트릭
+# =======================
+
+# agent-targets: 현재 활성 타깃(파일 테일 대상) 확인
+agent-targets:
+	curl -s {{AGENT_URL}}/agent/api/v1/logs/targets | jq -r .
+
+# agent-metrics: 전송/오류 지표 확인
+agent-metrics:
+	curl -s {{AGENT_URL}}/metrics | egrep -i 'promtail_targets_active|loki_sent_entries_total|loki_request_errors_total|promtail_file_bytes_total' || true
+
+# =======================
+# Prometheus quick checks (포워딩 상태)
+# =======================
+
+# prom-up: up 메트릭 조회
+prom-up:
+	curl -GsS '{{PROM_URL}}/api/v1/query' --data-urlencode 'query=up' | jq -r .
+
+# prom-loki-req: Loki 요청 카운트(환경에 따라 메트릭 명/레이블 다를 수 있음)
+prom-loki-req:
+	curl -GsS '{{PROM_URL}}/api/v1/query' \
+	  --data-urlencode 'query=sum by (status_code) (rate(loki_request_duration_seconds_count[{{RANGE_MIN}}m]))' | jq -r . || true
+
+# prom-agent-sent: Agent가 보낸 로그 라인 속도(스크레이프 중일 때)
+prom-agent-sent:
+	curl -GsS '{{PROM_URL}}/api/v1/query' \
+	  --data-urlencode 'query=rate(loki_sent_entries_total[{{RANGE_MIN}}m])' | jq -r . || true
+
+  
+  

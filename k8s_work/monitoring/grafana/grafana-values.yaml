@@ -1,0 +1,64 @@
+adminUser: admin
+adminPassword: adata0828!
+
+# grafana:
+#   grafana.ini:
+#     server:
+#       #root_url: "https://4.230.159.239/grafana"
+#       serve_from_sub_path: true
+#
+#     security:
+#       allow_embedding: true
+#       cookie_secure: true
+#       cookie_samesite: none # 다른 오리진에서 iframe 임베드 시 필요
+#
+#     auth.anonymous:
+#       enabled: true
+#       org_role: Viewer
+#
+# grafana-values.yaml
+
+# 필요한 공개 옵션만 유지
+env:
+  GF_SECURITY_ALLOW_EMBEDDING: "true"
+  GF_AUTH_ANONYMOUS_ORG_NAME: "Main Org."
+  GF_AUTH_ANONYMOUS_ENABLED: "true"
+  GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+  GF_FEATURE_TOGGLES_ENABLE: accessControlOnCall
+  GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
+  #GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana"
+  #GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s"
+  GF_SERVER_ROOT_URL: "https://4.230.159.239/grafana"
+  GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+  GF_SECURITY_COOKIE_SECURE: "true" # 외부 https면 권장
+  GF_SECURITY_COOKIE_SAMESITE: "none" # cross-origin iframe 이면 필요
+
+# 데이터소스 사전 등록
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-kube-prometheus-prometheus.monitoring.svc:9090
+        isDefault: true
+        editable: true
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.monitoring.svc:3100
+        editable: true
+
+service:
+  type: ClusterIP
+
+persistence:
+  enabled: true
+  type: pvc
+  storageClassName: managed-csi
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  finalizers:
+    - kubernetes.io/pvc-protection

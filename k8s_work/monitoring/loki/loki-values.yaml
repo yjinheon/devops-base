@@ -1,0 +1,16 @@
+grafana:
+  enabled: false
+promtail:
+  enabled: false
+loki:
+  enabled: true
+  pattern_ingester:
+    enabled: true
+  limits_config:
+    volume_enabled: true
+    max_entries_limit_per_query: 10000
+    allow_structured_metadata: true
+  persistence:
+    enabled: true
+    storageClassName: azurefile-csi
+    size: 10Gi

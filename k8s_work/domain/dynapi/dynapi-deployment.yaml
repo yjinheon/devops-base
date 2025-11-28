@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynapi
+  namespace: scv
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dynapi
+  template:
+    metadata:
+      labels:
+        app: dynapi
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      imagePullSecrets:
+        - name: acr-pull
+      containers:
+        - name: dynapi
+          image: scvacr.azurecr.io/dynapi:test31
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7878
+          envFrom:
+            - configMapRef:
+                name: dynapi-server-config
+            - secretRef:
+                name: dynapi-server-secret
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "512Mi"

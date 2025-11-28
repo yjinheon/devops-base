@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scv-engine
+  namespace: scv
+  labels:
+    app: scv-engine
+    environment: prod
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 1, maxSurge: 1 }
+  selector:
+    matchLabels: { app: scv-engine }
+  template:
+    metadata:
+      labels:
+        app: scv-engine
+        environment: prod
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8877"
+        prometheus.io/path: "/scv/actuator/prometheus"
+        # Grafana Agent/Promtail이 컨테이너 STDOUT 수집
+        logs.agent.grafana.com/collect: "true"
+        logs.agent.grafana.com/log-format: "json"
+    spec:
+      nodeSelector:
+        agentpool: memorypool
+      containers:
+        - name: scv-engine
+          image: scvacr.azurecr.io/scv-engine:f347957
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8877
+          env:
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+            - name: POD_IP
+              valueFrom: { fieldRef: { fieldPath: status.podIP } }
+            - name: POD_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            # - name: JAVA_TOOL_OPTIONS
+            #   value: >-
+            #     -XX:+UseG1GC
+            #     -XX:MaxGCPauseMillis=200
+            #     -XX:G1HeapRegionSize=8m
+            #     -XX:+UseStringDeduplication
+            #     -XX:MaxDirectMemorySize=256m
+            #     -XX:InitialRAMPercentage=58
+            #     -XX:MaxRAMPercentage=65
+            #     -XX:+ExitOnOutOfMemoryError
+            #     -XX:+HeapDumpOnOutOfMemoryError
+            #     -XX:HeapDumpPath=/tmp/heapdump.hprof
+            #     -XX:ErrorFile=/tmp/hs_err_pid%p.log
+            #     -Xlog:gc*,safepoint,gc+heap,gc+humongous:file=/proc/1/fd/1:uptime,level,tags
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xms3g -Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+            # - name: JAVA_TOOL_OPTIONS
+            #   value: >-
+            #     -Xms13g
+            #     -Xmx13g
+            #     -XX:+UseG1GC
+            #     -XX:MaxGCPauseMillis=200
+            #     -XX:MaxMetaspaceSize=512m
+            #     -XX:+HeapDumpOnOutOfMemoryError
+            #     -XX:HeapDumpPath=/tmp/heapdump.hprof
+            #
+          envFrom:
+            - configMapRef: { name: scv-engine-config }
+            - secretRef: { name: scv-engine-secret }
+
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2000m"
+            limits:
+              memory: "5Gi"
+              cpu: "3000m"
+          readinessProbe:
+            httpGet: { path: /scv/actuator/health, port: 8877 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /scv/actuator/health, port: 8877 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 2
+          #lifecycle:
+          #  preStop:
+          #    exec: { command: ["/bin/sh", "-c", "sleep 15"] }
+      terminationGracePeriodSeconds: 30

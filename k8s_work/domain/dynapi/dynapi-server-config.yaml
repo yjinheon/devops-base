@@ -1,0 +1,38 @@
+# ConfigMap - 일반 설정 정보
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dynapi-server-config
+  namespace: scv
+data:
+  SERVER_PORT: '7878'
+  SERVER_BASE_URL: 'http://0.0.0.0'
+  DB_HOST: 'pg-flex-scv01.postgres.database.azure.com'
+  DB_PORT: '5432'
+  DB_NAME: 'rnd'
+  DB_SCHEMA: 'scvad'
+  DB_USERNAME: 'rnduser'
+  JWT_EXPIRE_MS: '3600000'
+  SCV_CC_SERVER_PORT: '2790'
+  SCV_CC_CONTEXT_PATH: 'stml'
+  AES_KEY: 'G4vJzKpS2oLtQwRm'
+  AES_IV: 'M9yHcA3xB8uFjE5L'
+  MANAGEMENT_ENDPOINTS: 'health,info,metrics,prometheus'
+  LOKI_SERVER_URL: 'http://loki-service'
+  LOKI_SERVER_PORT: '3100'
+  SPRING_PROFILES_ACTIVE: 'prod'
+---
+# Secret - 보안이 필요한 정보
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dynapi-server-secret
+  namespace: scv
+  labels:
+    app: dynapi
+type: Opaque
+stringData:
+  #DB_PASSWORD: UndkQHVzZXIh
+  DB_PASSWORD: Rnd@user!
+  JWT_SECRET_KEY: eW91ci1qd3Qtc2VjcmV0LWtleS1oZXJlLWNoYW5nZS1pbi1wcm9kdWN0aW9u
+  DB_USER: rnduser

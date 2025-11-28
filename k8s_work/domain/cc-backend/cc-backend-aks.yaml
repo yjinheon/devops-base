@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cc-backend
+  namespace: scv
+  labels:
+    app: cc-backend
+    environment: azure
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cc-backend
+  template:
+    metadata:
+      labels:
+        app: cc-backend
+        environment: azure
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2790"
+        prometheus.io/path: "stml/actuator/prometheus"
+    spec:
+      nodeSelector:
+        agentpool: memorypool
+      containers:
+        - name: cc-backend
+          image: scvacr.azurecr.io/cc-backend:deb4714
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 2790
+              protocol: TCP
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: SERVER_PORT
+              value: "2790"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xms4g -Xmx4g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+          envFrom:
+            - configMapRef: { name: scv-engine-config }
+            - secretRef: { name: scv-engine-secret }
+
+          resources:
+            requests:
+              memory: "5Gi"
+            limits:
+              memory: "6Gi"
+   
+          envFrom:
+            - configMapRef:
+                name: cc-backend-config
+            - secretRef:
+                name: cc-backend-secret
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+          volumeMounts:
+            - name: upload-storage
+              mountPath: /app/images
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - cc-backend
+                topologyKey: kubernetes.io/hostname
+      volumes:
+        - name: upload-storage
+          persistentVolumeClaim:
+            claimName: cc-backend-upload-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cc-backend-upload-pvc
+  namespace: scv
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: azurefile-csi

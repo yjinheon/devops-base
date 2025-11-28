@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apim-gateway
+  namespace: scv
+  labels:
+    app: apim-gateway
+    environment: prod
+    version: 'v1.0.11'
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 1, maxSurge: 1 }
+  selector:
+    matchLabels: { app: apim-gateway }
+  template:
+    metadata:
+      labels:
+        app: apim-gateway
+        environment: prod
+        version: 'v1.0.11'
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8888'
+        prometheus.io/path: '/actuator/prometheus'
+        # Grafana Agent/Promtail이 컨테이너 STDOUT 수집
+        logs.agent.grafana.com/collect: 'true'
+        logs.agent.grafana.com/log-format: 'json'
+    spec:
+      nodeSelector:
+        agentpool: userpool # syspool로 가지 않게
+      containers:
+        - name: apim-gateway
+          image: scvacr.azurecr.io/apim-gateway:test58
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8888
+          env:
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+            - name: POD_IP
+              valueFrom: { fieldRef: { fieldPath: status.podIP } }
+            - name: POD_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: SPRING_PROFILES_ACTIVE
+              value: 'prod'
+            - name: LOG_PATH
+              value: '/app/gateway/log'
+            #- name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+            #  value: "http://apim-auth:8889" # DNS로 확정
+            # Service ENV를 이용해 내부 베이스 URL을 만들고 싶다면 주석 해제:
+            # - name: SERVER_BASE_URL
+            #   value: "http://$(APIM_GATEWAY_SERVICE_HOST):$(APIM_GATEWAY_SERVICE_PORT_HTTP)"
+          envFrom:
+            - configMapRef: { name: gateway-config }
+
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8888 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8888 }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 2
+
+          lifecycle:
+            preStop:
+              exec: { command: ['/bin/sh', '-c', 'sleep 15'] }
+      terminationGracePeriodSeconds: 30

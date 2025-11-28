@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cc-backend
+  namespace: scv
+  labels:
+    app: cc-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: cc-backend
+  ports:
+    - name: metrics
+      port: 2790
+      targetPort: 2790

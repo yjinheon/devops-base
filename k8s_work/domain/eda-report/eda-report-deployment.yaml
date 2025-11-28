@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eda-report
+  namespace: scv
+  labels:
+    app: eda-report
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eda-report
+  template:
+    metadata:
+      labels:
+        app: eda-report
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8889'
+        prometheus.io/path: 'actuator/prometheus'
+        logs.agent.grafana.com/collect: 'true'
+        logs.agent.grafana.com/log-format: 'json'
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: eda-report
+          image: scvacr.azurecr.io/eda-report:test05
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+          envFrom:
+            - configMapRef:
+                name: eda-report-config
+            - secretRef:
+                name: eda-report-secret

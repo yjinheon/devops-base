@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynapi
+  namespace: scv
+  labels:
+    app: dynapi
+    environment: scv
+spec:
+  type: ClusterIP
+  selector:
+    app: dynapi
+  ports:
+    - name: metrics
+      port: 7878
+      targetPort: 7878
+  sessionAffinity: None

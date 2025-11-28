@@ -1,0 +1,2275 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 0,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 31,
+      "links": [
+        {
+          "title": "list",
+          "url": "/grafana/d/feqrss011cpa8b/stat-dashboard\n?orgId=1\n&timezone=browser\n&var-kiosk=${kiosk}\n&${kiosk}\n&var-variables=${variables}\n&${variables}\n&var-timePicker=${timePicker}\n&${timePicker}\n&var-theme=${theme}\n&theme=${theme}\n&${__url_time_range}"
+        }
+      ],
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.2.0",
+      "title": "돌아가기",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/성공*/"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/건수$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/율$|률$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/실패*/"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/시간$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/크기$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "카테고리"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "성공률"
+            },
+            "properties": [
+              {
+                "id": "color"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "light-red",
+                      "value": 0
+                    },
+                    {
+                      "color": "orange",
+                      "value": 0.249
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 0.499
+                    },
+                    {
+                      "color": "green",
+                      "value": 0.749
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 32,
+      "options": {
+        "cellHeight": "sm",
+        "enablePagination": false,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  end_point, api_title, category_name,\n  SUM(total_count) AS total_api_calls,               -- 총 호출수\n  SUM(success_count) AS total_success,               -- 총 성공수\n  SUM(fail_count) AS total_fail,                     -- 총 실패수\n\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(success_count)::float / SUM(total_count))::numeric, 4)\n  ELSE 0 END AS success_rate,                        -- 성공률 (0~1)\n\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(fail_count)::float / SUM(total_count))::numeric, 4)\n  ELSE 0 END AS fail_rate,                           -- 실패율 (0~1)\n\n  ROUND(AVG(avg_duration_ms)::numeric, 2) AS avg_response_time_ms,           -- 평균 응답시간\n  MAX(max_duration_ms) AS max_response_time_ms,                             -- 최대 응답시간\n  MIN(min_duration_ms) AS min_response_time_ms,                             -- 최소 응답시간\n\n  ROUND(AVG(avg_response_size_bytes)::numeric, 2) AS avg_response_size_bytes,   -- 평균 응답사이즈\n  MAX(max_response_size_bytes) AS max_response_size_bytes,                      -- 최대 응답사이즈\n  MIN(min_response_size_bytes) AS min_response_size_bytes                       -- 최소 응답사이즈\n\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN\n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY end_point, api_title, category_name\nORDER BY total_api_calls DESC\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "API 종합 통계",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "end_point": false,
+              "fail_rate": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "api_title": 0,
+              "avg_response_size_bytes": 11,
+              "avg_response_time_ms": 8,
+              "category_name": 1,
+              "end_point": 2,
+              "fail_rate": 7,
+              "max_response_size_bytes": 13,
+              "max_response_time_ms": 10,
+              "min_response_size_bytes": 12,
+              "min_response_time_ms": 9,
+              "success_rate": 6,
+              "total_api_calls": 3,
+              "total_fail": 5,
+              "total_success": 4
+            },
+            "renameByName": {
+              "api_title": "서비스",
+              "avg_response_size_bytes": "평균 응답크기",
+              "avg_response_time_ms": "평균 응답시간",
+              "category_name": "카테고리",
+              "end_point": "endPoint",
+              "fail_rate": "실패율",
+              "max_response_size_bytes": "최대 응답크기",
+              "max_response_time_ms": "최대 응답시간",
+              "min_response_size_bytes": "최소 응답크기",
+              "min_response_time_ms": "최소 응답시간",
+              "success_rate": "성공률",
+              "total_api_calls": "총 건수",
+              "total_fail": "실패 건수",
+              "total_success": "성공 건수"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "총 호출건수"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "총 성공건수"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "총 실패건수"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 10,
+        "x": 0,
+        "y": 5
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  COALESCE(SUM(total_count), 0)         AS \"총 호출건수\",           -- total_api_calls\n  COALESCE(SUM(success_count), 0)       AS \"총 성공건수\",           -- total_success_calls\n  COALESCE(SUM(fail_count), 0)          AS \"총 실패건수\"           -- total_fail_calls\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "전체 데이터 전송량"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 2,
+        "x": 10,
+        "y": 5
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  COALESCE(SUM(avg_response_size_bytes * total_count), 0) AS \"전체 데이터 전송량\",  -- total_response_bytes\n  COALESCE(COUNT(DISTINCT user_id), 0)  AS \"전체 사용자수\"           -- total_user_count\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-greens"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 5
+      },
+      "id": 28,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 0,
+        "minVizWidth": 8,
+        "namePlacement": "top",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "manual",
+        "text": {},
+        "valueMode": "text"
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- ① 기간 내 TOP 사용자 뽑기\nWITH top_users AS (\n  SELECT user_id, end_point\n  FROM apim.apm_api_call_stat_daily\n  WHERE end_point = '${endPoint}'\n  AND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n  GROUP BY end_point, user_id\n  ORDER BY SUM(total_count) DESC\n  LIMIT 5\n)\nSELECT\n  user_id,\n  SUM(total_count) AS total_api_calls   -- 호출수 합계\nFROM\n  apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nAND user_id IN (SELECT user_id FROM top_users)\nGROUP BY\n  end_point, user_id\nORDER BY\n  total_api_calls DESC\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "최다 호출 사용자 상위",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "end_point": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "service": ""
+            }
+          }
+        }
+      ],
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 5
+      },
+      "id": 27,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "top",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^실패율$/",
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "text"
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  user_id AS \"유저\",\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(fail_count)::float / SUM(total_count))::numeric, 2)\n  ELSE 0 END AS \"실패율\"\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY user_id\nHAVING SUM(total_count) > 0\nORDER BY \"실패율\" DESC\nLIMIT 5\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "사용자 실패율 상위",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "평균 응답 크기"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최소 응답 크기"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최대 응답 크기"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 10,
+        "x": 0,
+        "y": 7
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  COALESCE(ROUND(AVG(avg_response_size_bytes)::numeric, 2), 0)  AS \"평균 응답 크기\",    -- avg_response_size_bytes\n  COALESCE(MIN(min_response_size_bytes), 0) AS \"최소 응답 크기\",                       -- min_response_size_bytes\n  COALESCE(MAX(max_response_size_bytes), 0) AS \"최대 응답 크기\"\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "평균 응답 시간"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최소 응답 시간"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최대 응답 시간"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 10,
+        "x": 0,
+        "y": 9
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 15,
+          "valueSize": 30
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  COALESCE(ROUND(AVG(avg_duration_ms)::numeric, 2), 0) AS \"평균 응답 시간\",              -- avg_response_time_ms\n  COALESCE(MIN(min_duration_ms), 0)   AS \"최소 응답 시간\",                               -- min_response_time_ms\n  COALESCE(MAX(max_duration_ms), 0)   AS \"최대 응답 시간\"\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 30,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": false
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH daily_summary AS (\n  SELECT\n    to_char(stat_date, 'yyyy-mm-dd') AS stat_date,\n    MAX(max_duration_ms) AS max_duration,\n    MAX(max_response_size_bytes) AS max_response_size,\n    COUNT(DISTINCT user_id) AS unique_users,\n    SUM(total_count) AS total_calls,\n    SUM(fail_count) AS fail_calls\n  FROM apim.apm_api_call_stat_daily\n  WHERE end_point = '${endPoint}'\n  AND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n  GROUP BY stat_date\n),\n\nmax_stats AS (\n  (\n    SELECT\n      '호출 수 최다' AS 항목,\n      stat_date AS 날짜,\n      TO_CHAR(total_calls, 'FM999,999,999') || ' 건' AS 값\n    FROM daily_summary\n    ORDER BY total_calls DESC\n    LIMIT 1\n  )\n\n  UNION ALL\n\n  (\n    SELECT\n      '실패 수 최다',\n      stat_date,\n      TO_CHAR(fail_calls, 'FM999,999,999') || ' 건'\n    FROM daily_summary\n    ORDER BY fail_calls DESC\n    LIMIT 1\n  )\n\n  UNION ALL\n\n  (\n    SELECT\n      '최대 응답 시간',\n      stat_date,\n      CASE\n        WHEN max_duration >= 1000 THEN \n          TO_CHAR(ROUND(max_duration / 1000.0, 2), 'FM999,999,990.00') || ' s'\n        ELSE \n          TO_CHAR(max_duration, 'FM999,999,990') || ' ms'\n      END\n    FROM daily_summary\n    ORDER BY max_duration DESC\n    LIMIT 1\n  )\n\n  UNION ALL\n\n  (\n    SELECT\n      '최대 응답 데이터 크기',\n      stat_date,\n      CASE\n        WHEN max_response_size >= 1024 * 1024 THEN \n          TO_CHAR(ROUND(max_response_size / 1024.0 / 1024.0, 2), 'FM999,999,990.00') || ' MB'\n        WHEN max_response_size >= 1024 THEN \n          TO_CHAR(ROUND(max_response_size / 1024.0, 2), 'FM999,999,990.00') || ' KB'\n        ELSE \n          TO_CHAR(max_response_size, 'FM999,999,990') || ' bytes'\n      END\n    FROM daily_summary\n    ORDER BY max_response_size DESC\n    LIMIT 1\n  )\n\n  UNION ALL\n\n  (\n    SELECT\n      '사용자 수 최다',\n      stat_date,\n      TO_CHAR(unique_users, 'FM999,999,999') || ' 명'\n    FROM daily_summary\n    ORDER BY unique_users DESC\n    LIMIT 1\n  )\n)\n\nSELECT * FROM max_stats;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "주요항목 발생 요약",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": -1,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 40,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "증감률"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "%"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH daily_calls AS (\n  SELECT\n    stat_date,\n    SUM(total_count) AS total_calls\n  FROM apim.apm_api_call_stat_daily\n  WHERE end_point = '${endPoint}'\n    AND stat_date BETWEEN \n        date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n        date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\n  GROUP BY stat_date\n),\nprev_data AS (\n  SELECT\n    a.stat_date,\n    a.total_calls,\n    (\n      SELECT b.total_calls\n      FROM daily_calls b\n      WHERE b.stat_date < a.stat_date\n      ORDER BY b.stat_date DESC\n      LIMIT 1\n    ) AS prev_total_calls\n  FROM daily_calls a\n)\nSELECT\n  stat_date AS \"time\",\n  CASE\n    WHEN prev_total_calls IS NULL THEN NULL\n    WHEN prev_total_calls = 0 AND total_calls > 0 THEN 100\n    WHEN prev_total_calls = 0 AND total_calls = 0 THEN 0\n    ELSE ROUND(((total_calls - prev_total_calls)::float / prev_total_calls)::numeric * 100, 2)\n  END AS \"증감률\"\nFROM prev_data\nORDER BY stat_date;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "서비스 호출 증감률 추이",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "호출": {
+                  "color": "red",
+                  "index": 0
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "평균"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최소"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최대"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  stat_date AS \"time\",                 -- Grafana 시계열 패널에 맞춤\n  AVG(avg_duration_ms) AS \"평균\",\n  MIN(min_duration_ms) AS \"최소\",\n  MAX(max_duration_ms) AS \"최대\"\nFROM\n  apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY\n  stat_date\nORDER BY\n  stat_date\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "서비스 응답시간 평균/최소/최대 추이",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "호출": {
+                  "color": "red",
+                  "index": 0
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "호출"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "성공"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "실패"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  stat_date AS \"time\",                 -- Grafana 시계열 패널에 맞춤\n  SUM(total_count) AS \"호출\",  -- 전체 호출 수\n  SUM(success_count) AS \"성공\",  -- 성공 건수\n  SUM(fail_count) AS \"실패\"         -- 실패 건수\nFROM\n  apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY\n  stat_date\nORDER BY\n  stat_date\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "서비스 호출/성공/실패 추이",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "호출": {
+                  "color": "red",
+                  "index": 0
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "평균"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최소"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "최대"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 24,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  stat_date AS \"time\",                 -- Grafana 시계열 패널에 맞춤\n  AVG(avg_response_size_bytes) AS \"평균\",\n  MIN(min_response_size_bytes) AS \"최소\",\n  MAX(max_response_size_bytes) AS \"최대\"\nFROM\n  apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY\n  stat_date\nORDER BY\n  stat_date\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "서비스 응답크기 평균/최소/최대 추이",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "호출": {
+                  "color": "red",
+                  "index": 0
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "성공률"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "실패율"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  stat_date AS \"time\",             -- Grafana 시계열 패널 인식\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(success_count)::float / SUM(total_count))::numeric, 2)\n  ELSE 0 END AS \"성공률\",\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(fail_count)::float / SUM(total_count))::numeric, 2)\n  ELSE 0 END AS \"실패율\"\nFROM\n  apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY\n  stat_date\nORDER BY\n  stat_date\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "서비스 성공률/실패율 추이",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "df2o23upcgutcc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/성공*/"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/건수$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "locale"
+              },
+              {
+                "id": "custom.width",
+                "value": 103
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/율$|률$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/실패*/"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/시간$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "custom.width",
+                "value": 126
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/크기$/"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              },
+              {
+                "id": "custom.width",
+                "value": 126
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 25,
+      "options": {
+        "cellHeight": "sm",
+        "enablePagination": true,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "df2o23upcgutcc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  end_point, api_title, user_id,\n  SUM(total_count) AS total_api_calls,               -- 총 호출수\n  SUM(success_count) AS total_success,               -- 총 성공수\n  SUM(fail_count) AS total_fail,                     -- 총 실패수\n\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(success_count)::float / SUM(total_count))::numeric, 4)\n  ELSE 0 END AS success_rate,                        -- 성공률 (0~1)\n\n  CASE WHEN SUM(total_count) > 0 THEN\n    ROUND((SUM(fail_count)::float / SUM(total_count))::numeric, 4)\n  ELSE 0 END AS fail_rate,                           -- 실패율 (0~1)\n\n  ROUND(AVG(avg_duration_ms)::numeric, 2) AS avg_response_time_ms,           -- 평균 응답시간\n  MAX(max_duration_ms) AS max_response_time_ms,                             -- 최대 응답시간\n  MIN(min_duration_ms) AS min_response_time_ms,                             -- 최소 응답시간\n\n  ROUND(AVG(avg_response_size_bytes)::numeric, 2) AS avg_response_size_bytes,   -- 평균 응답사이즈\n  MAX(max_response_size_bytes) AS max_response_size_bytes,                      -- 최대 응답사이즈\n  MIN(min_response_size_bytes) AS min_response_size_bytes                       -- 최소 응답사이즈\n\nFROM apim.apm_api_call_stat_daily\nWHERE end_point = '${endPoint}'\nAND stat_date BETWEEN \n      date_trunc('day', ($__timeFrom()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date AND \n      date_trunc('day', ($__timeTo()::timestamptz AT TIME ZONE 'Asia/Seoul') )::date\nGROUP BY end_point, api_title, user_id\nORDER BY total_api_calls DESC\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "사용자별 API 종합 통계",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "api_title": true,
+              "category_name": true,
+              "end_point": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "api_title": 1,
+              "avg_response_size_bytes": 12,
+              "avg_response_time_ms": 9,
+              "category_name": 2,
+              "end_point": 3,
+              "fail_rate": 8,
+              "max_response_size_bytes": 14,
+              "max_response_time_ms": 11,
+              "min_response_size_bytes": 13,
+              "min_response_time_ms": 10,
+              "success_rate": 7,
+              "total_api_calls": 4,
+              "total_fail": 6,
+              "total_success": 5,
+              "user_id": 0
+            },
+            "renameByName": {
+              "api_title": "서비스",
+              "avg_response_size_bytes": "평균 응답크기",
+              "avg_response_time_ms": "평균 응답시간",
+              "category_name": "카테고리",
+              "end_point": "",
+              "fail_rate": "실패율",
+              "max_response_size_bytes": "최대 응답크기",
+              "max_response_time_ms": "최대 응답시간",
+              "min_response_size_bytes": "최소 응답크기",
+              "min_response_time_ms": "최소 응답시간",
+              "success_rate": "성공률",
+              "total_api_calls": "총 건수",
+              "total_fail": "실패 건수",
+              "total_success": "성공 건수",
+              "user_id": "사용자"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "/openapi/db/cate02/detail",
+          "value": "/openapi/db/cate02/detail"
+        },
+        "name": "endPoint",
+        "options": [],
+        "query": "",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "none",
+          "value": "none"
+        },
+        "name": "kiosk",
+        "options": [
+          {
+            "selected": true,
+            "text": "none",
+            "value": "none"
+          },
+          {
+            "selected": false,
+            "text": "kiosk",
+            "value": "kiosk"
+          }
+        ],
+        "query": "none, kiosk",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "none",
+          "value": "none"
+        },
+        "name": "variables",
+        "options": [
+          {
+            "selected": true,
+            "text": "none",
+            "value": "none"
+          },
+          {
+            "selected": false,
+            "text": "_dash.hideVariables",
+            "value": "_dash.hideVariables"
+          }
+        ],
+        "query": "none, _dash.hideVariables",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "none",
+          "value": "none"
+        },
+        "name": "timePicker",
+        "options": [
+          {
+            "selected": true,
+            "text": "none",
+            "value": "none"
+          },
+          {
+            "selected": false,
+            "text": "_dash.hideVariables",
+            "value": "_dash.hideVariables"
+          }
+        ],
+        "query": "none, _dash.hideVariables",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "description": "dark, light",
+        "name": "theme",
+        "options": [],
+        "query": "",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now/M",
+    "to": "now/M"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Detail Stat Dashboard",
+  "uid": "fer6tvzbhimm8c",
+  "version": 15
+}

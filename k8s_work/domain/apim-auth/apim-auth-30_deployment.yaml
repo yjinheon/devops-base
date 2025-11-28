@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apim-auth
+  namespace: scv
+  labels:
+    app: apim-auth
+    environment: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apim-auth
+  template:
+    metadata:
+      labels:
+        app: apim-auth
+        environment: prod
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8889"
+        prometheus.io/path: "actuator/prometheus"
+        logs.agent.grafana.com/collect: "true"
+        logs.agent.grafana.com/log-format: "json"
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: apim-auth
+          image: scvacr.azurecr.io/apim-auth:0ac1702
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8889
+          envFrom:
+            - configMapRef:
+                name: apim-auth-config
+            - secretRef:
+                name: apim-auth-secret

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eda-report-config
+  namespace: scv
+data:
+  CORS_ORIGINS: 'http://localhost:8080,https://localhost:8080,http://localhost:3000,http://4.230.159.239,https://4.230.159.239'
+---
+# Secret - 보안이 필요한 정보
+apiVersion: v1
+kind: Secret
+metadata:
+  name: eda-report-secret
+  namespace: scv
+  labels:
+    app: eda-report
+type: Opaque
+stringData:
+  DATABASE_URL: 'postgresql+asyncpg://etluser:adataetl!@pg-flex-scv01.postgres.database.azure.com:5432/rnd'
+  #DB_USER: rnduser
