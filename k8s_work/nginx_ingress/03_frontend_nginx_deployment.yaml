@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    app: frontend-nginx
+  name: frontend-nginx
+  namespace: scv
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend-nginx
+  template:
+    metadata:
+      labels:
+        app: frontend-nginx
+    spec:
+      containers:
+        - image: nginx:1.25-alpine
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          name: nginx
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: config
+      volumes:
+        - configMap:
+            name: frontend-nginx-config
+          name: config

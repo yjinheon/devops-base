@@ -116,3 +116,23 @@ spec:
       relabelings:
         - targetLabel: instance
           replacement: apim-auth
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: eda-report-sm
+  namespace: scv
+  labels:
+    release: prometheus
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: eda-report
+  endpoints:
+    - port: metrics
+      path: /actuator/prometheus
+      interval: 15s
+      relabelings:
+        - targetLabel: instance
+          replacement: apim-auth

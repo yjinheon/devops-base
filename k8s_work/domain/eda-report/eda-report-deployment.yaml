@@ -25,7 +25,7 @@ spec:
         agentpool: userpool
       containers:
         - name: eda-report
-          image: scvacr.azurecr.io/eda-report:test05
+          image: scvacr.azurecr.io/eda-report:test08
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5001
