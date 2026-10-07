@@ -1,0 +1,136 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: scv
+data:
+  default.conf: |
+    server {
+      listen 80;
+      server_name _;
+
+
+
+      location / {
+        proxy_pass https://scvwebsa01.z12.web.core.windows.net;
+        proxy_set_header Host scvwebsa01.z12.web.core.windows.net;
+        proxy_ssl_server_name on;
+        proxy_http_version 1.1;
+
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 1200s;
+        proxy_read_timeout 1200s;
+
+
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Port  $server_port;
+
+        proxy_intercept_errors on;
+        error_page 404 = /index.html;
+      }
+
+
+
+      location /gateway/ {
+        proxy_pass http://apim-gateway:8888/;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+
+
+        proxy_hide_header Vary;
+        proxy_hide_header X-Gateway-ID;
+        add_header Vary "Origin" always;
+
+      }
+
+      location /cc/ {
+        proxy_pass http://cc-backend:2790/;
+
+        proxy_set_header X-Forwarded-Prefix /cc;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $http_x_real_ip;
+        proxy_set_header X-Forwarded-For    $http_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+
+
+      }
+
+      location /ai/ {
+        proxy_pass http://eda-report:5001/;
+
+        proxy_set_header X-Forwarded-Prefix /ai;
+
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, X-Requested-With' always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $http_x_real_ip;
+        proxy_set_header X-Forwarded-For    $http_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+
+      }
+
+
+
+      location /testapi/ {
+        proxy_pass http://apim-gateway:8888/;
+
+        proxy_set_header X-Forwarded-Prefix /testapi;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+      }
+
+      location /openapi/ {
+        proxy_pass http://apim-gateway:8888/;
+
+        proxy_set_header X-Forwarded-Prefix /openapi;
+
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Port   $server_port;
+
+        proxy_redirect ~^https?://[^/]+(/.*)$ $scheme://$host$1;
+        port_in_redirect off;
+      }
+
+
+      location /healthz {
+        return 200 "OK\n";
+        add_header Content-Type text/plain;
+      }
+    }

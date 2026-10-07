@@ -24,7 +24,6 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8888'
         prometheus.io/path: '/actuator/prometheus'
-        # Grafana Agent/Promtail이 컨테이너 STDOUT 수집
         logs.agent.grafana.com/collect: 'true'
         logs.agent.grafana.com/log-format: 'json'
     spec:
@@ -50,11 +49,6 @@ spec:
               value: 'prod'
             - name: LOG_PATH
               value: '/app/gateway/log'
-            #- name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
-            #  value: "http://apim-auth:8889" # DNS로 확정
-            # Service ENV를 이용해 내부 베이스 URL을 만들고 싶다면 주석 해제:
-            # - name: SERVER_BASE_URL
-            #   value: "http://$(APIM_GATEWAY_SERVICE_HOST):$(APIM_GATEWAY_SERVICE_PORT_HTTP)"
           envFrom:
             - configMapRef: { name: gateway-config }
 
