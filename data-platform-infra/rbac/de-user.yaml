@@ -1,0 +1,46 @@
+# de-user: airflow, trino 네임스페이스 전용 계정 (다른 네임스페이스 접근 불가)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: de-user
+  namespace: airflow
+---
+# 1.24+ 는 SA 토큰이 자동 생성되지 않음 -> 장기 토큰 Secret 선언
+apiVersion: v1
+kind: Secret
+metadata:
+  name: de-user-token
+  namespace: airflow
+  annotations:
+    kubernetes.io/service-account.name: de-user
+type: kubernetes.io/service-account-token
+---
+# 내장 ClusterRole을 RoleBinding으로 걸면 해당 네임스페이스로 권한이 한정됨
+# edit: 리소스 CRUD + exec + secret 읽기 / view: 조회만, secret 제외
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: de-user
+  namespace: airflow
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: de-user
+  namespace: airflow
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: de-user
+  namespace: trino
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: de-user
+  namespace: airflow

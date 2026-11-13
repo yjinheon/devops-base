@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>k3s 데이터 플랫폼 개요</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--paper:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#5a6580;--accent:#bf4520;--accent-tint:rgba(191,69,32,.08);--rule:rgba(45,49,66,.12);--dot:rgba(45,49,66,.10);--side-fill:rgba(79,93,117,.06);--side-stroke:#5a6580;--zone-fill:rgba(45,49,66,.025);--zone-stroke:rgba(45,49,66,.32);--bar-fill:rgba(45,49,66,.05);--sans:'Geist','Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--serif:'Instrument Serif','Noto Serif KR',serif;--mono:'Geist Mono',ui-monospace,monospace}
+    body{font-family:var(--sans);background:var(--paper);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:3rem 2rem}
+    .frame{max-width:1200px;width:100%;min-width:0}
+    .diagram-container{width:100%;overflow-x:auto}
+    .eyebrow{font:500 .66rem var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+    h1{font:400 clamp(1.5rem,2.4vw + .75rem,2rem)/1.15 var(--serif);letter-spacing:-.02em;margin-bottom:1.5rem}
+    svg{width:100%;min-width:1200px;display:block}
+    svg text{font-family:var(--sans)}
+    .connector{fill:none;stroke:var(--muted);stroke-width:1.2}
+    .connector.primary{stroke:var(--accent);stroke-width:1.4}
+    .connector.trigger{stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3}
+    .label-mask{fill:var(--paper)}
+    .edge-label{fill:var(--accent);font:8px var(--mono);letter-spacing:.06em}
+    .edge-label.sec{fill:var(--muted)}
+    .zone{fill:var(--zone-fill);stroke:var(--zone-stroke)}
+    .zone-mask,.node-mask{fill:var(--paper)}
+    .zone-label{fill:var(--soft);font:500 8px var(--mono);letter-spacing:.18em}
+    .side-node{fill:var(--side-fill);stroke:var(--side-stroke)}
+    .core-node{fill:var(--accent-tint);stroke:var(--accent)}
+    .plain-node{fill:#fff;stroke:var(--zone-stroke)}
+    .bar{fill:var(--bar-fill);stroke:var(--zone-stroke)}
+    .role-box{fill:transparent;stroke:var(--side-stroke);stroke-opacity:.5}
+    .role-box.focal{stroke:var(--accent)}
+    .role-text{fill:var(--side-stroke);font:500 7px var(--mono);letter-spacing:.08em}
+    .role-text.focal{fill:var(--accent)}
+    .node-name{fill:var(--ink);font:600 12px var(--sans)}
+    .node-sub{fill:var(--muted);font:9px var(--mono)}
+    .callout{fill:var(--accent);font:italic 14px var(--serif)}
+    .legend-key{fill:var(--muted);font:500 8px var(--mono);letter-spacing:.14em}
+    .legend-text{fill:var(--muted);font:8px var(--sans)}
+    @media print{.diagram-container{overflow-x:visible}svg{min-width:0}}
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">DP Integration · 전체 개요</p>
+    <h1>k3s 데이터 플랫폼 개요</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="platform-overview-title platform-overview-desc">
+        <title id="platform-overview-title">k3s 데이터 플랫폼 개요</title>
+        <desc id="platform-overview-desc">OLTP DB, SaaS API, AMC 트래킹 데이터가 Airflow 배치와 Kafka·Debezium 스트림을 거쳐 Iceberg 레이크하우스와 단일 ClickHouse로 모이고, 대시보드·amc 서비스·카탈로그가 이를 소비한다.</desc>
+        <defs>
+          <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="var(--dot)"/></pattern>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--muted)"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--accent)"/></marker>
+          <marker id="arrow-focal" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--accent)"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2e5aa8"/></marker>
+          <marker id="arrow-sm" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="var(--muted)"/></marker>
+          <marker id="arrow-dim" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--soft)"/></marker>
+          <g id="ico-db" fill="none" stroke="currentColor" stroke-width="1.2"><ellipse cx="0" cy="-5" rx="7" ry="3"/><path d="M-7-5V5c0 2 14 2 14 0V-5M-7 0c0 2 14 2 14 0"/></g>
+          <g id="ico-stream" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M-8-5H2M-4 0H8M-8 5H2"/><path d="m0-8 3 3-3 3M6-3l3 3-3 3M0 2l3 3-3 3"/></g>
+          <g id="ico-chart" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M-8 8H8M-6 6V0H-2V6M0 6V-7H4V6M6 6V-3H9"/></g>
+          <g id="ico-notebook" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="-7" y="-8" width="14" height="16" rx="2"/><path d="M-3-8V8M0-3h4M0 1h4"/></g>
+          <g id="ico-api" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M-3-8c-3 0-3 2-3 4v2c0 2-1 2-3 2 2 0 3 0 3 2v2c0 2 0 4 3 4M3-8c3 0 3 2 3 4v2c0 2 1 2 3 2-2 0-3 0-3 2v2c0 2 0 4-3 4"/></g>
+        </defs>
+        <rect width="1200" height="600" fill="var(--paper)"/><rect width="1200" height="600" fill="url(#dots)" opacity=".55"/>
+        <rect class="zone" x="260" y="72" width="696" height="336" rx="8" stroke-width="1"/>
+
+        <!-- Connectors first (z-order). Core nodes use fixed widths (224/160) instead of the even-split formula so every focal edge stays a straight horizontal. -->
+        <line class="connector" x1="200" y1="124" x2="276" y2="124" marker-end="url(#arrow)"/>
+        <path class="connector" d="M200 200 H232 Q240 200 240 192 V156 Q240 148 248 148 H276" marker-end="url(#arrow)"/>
+        <path class="connector" d="M200 224 H240 Q248 224 248 232 V268 Q248 276 256 276 H336" marker-end="url(#arrow)"/>
+        <line class="connector" x1="200" y1="300" x2="336" y2="300" marker-end="url(#arrow)"/>
+        <line class="connector trigger" x1="448" y1="160" x2="448" y2="176" marker-end="url(#arrow)"/>
+        <line class="connector trigger" x1="736" y1="160" x2="736" y2="176" marker-end="url(#arrow)"/>
+        <line class="connector primary" x1="560" y1="212" x2="656" y2="212" marker-end="url(#arrow-focal)"/>
+        <line class="connector primary" x1="560" y1="300" x2="656" y2="300" marker-end="url(#arrow-focal)"/>
+        <path class="connector primary" d="M816 188 H960 Q968 188 968 180 V132 Q968 124 976 124 H1000" marker-end="url(#arrow-focal)"/>
+        <line class="connector primary" x1="816" y1="212" x2="1000" y2="212" marker-end="url(#arrow-focal)"/>
+        <line class="connector primary" x1="816" y1="300" x2="1000" y2="300" marker-end="url(#arrow-focal)"/>
+
+        <!-- Edge labels: paper masks, 8px clear of their stroke -->
+        <g text-anchor="middle">
+          <rect class="label-mask" x="220" y="104" width="36" height="12" rx="2"/><text class="edge-label sec" x="238" y="113">REST</text>
+          <rect class="label-mask" x="196" y="164" width="36" height="12" rx="2"/><text class="edge-label sec" x="214" y="173">JDBC</text>
+          <rect class="label-mask" x="280" y="256" width="32" height="12" rx="2"/><text class="edge-label sec" x="296" y="265">CDC</text>
+          <rect class="label-mask" x="244" y="308" width="48" height="12" rx="2"/><text class="edge-label sec" x="268" y="317">EVENTS</text>
+          <rect class="label-mask" x="584" y="192" width="48" height="12" rx="2"/><text class="edge-label" x="608" y="201">PUBLISH</text>
+          <rect class="label-mask" x="572" y="280" width="72" height="12" rx="2"/><text class="edge-label" x="608" y="289">KAFKA ENGINE</text>
+          <rect class="label-mask" x="868" y="168" width="32" height="12" rx="2"/><text class="edge-label" x="884" y="177">SQL</text>
+          <rect class="label-mask" x="852" y="220" width="68" height="12" rx="2"/><text class="edge-label" x="886" y="229">CONTENT-API</text>
+          <rect class="label-mask" x="860" y="280" width="52" height="12" rx="2"/><text class="edge-label" x="886" y="289">METADATA</text>
+        </g>
+
+        <!-- Zone label -->
+        <rect class="zone-mask" x="532" y="68" width="152" height="16" rx="2"/><text class="zone-label" x="608" y="79" text-anchor="middle">DATA PLATFORM CORE</text>
+
+        <!-- Sources -->
+        <g text-anchor="middle">
+          <rect class="node-mask" x="40" y="92" width="160" height="64" rx="6"/><rect class="side-node" x="40" y="92" width="160" height="64" rx="6"/><use href="#ico-api" transform="translate(60 124)" style="color:var(--muted)"/><text class="node-name" x="128" y="116">SaaS APIs</text><text class="node-sub" x="128" y="132">Cafe24 · Makeshop</text><text class="node-sub" x="128" y="145">GA4 · Trends</text>
+          <rect class="node-mask" x="40" y="180" width="160" height="64" rx="6"/><rect class="side-node" x="40" y="180" width="160" height="64" rx="6"/><use href="#ico-db" transform="translate(60 212)" style="color:var(--muted)"/><text class="node-name" x="128" y="204">OLTP DBs</text><text class="node-sub" x="128" y="220">Oracle · MariaDB</text><text class="node-sub" x="128" y="233">MySQL · Postgres</text>
+          <rect class="node-mask" x="40" y="268" width="160" height="64" rx="6"/><rect class="side-node" x="40" y="268" width="160" height="64" rx="6"/><use href="#ico-stream" transform="translate(60 300)" style="color:var(--muted)"/><text class="node-name" x="128" y="292">AMC tracking</text><text class="node-sub" x="128" y="308">edge → amc-api</text><text class="node-sub" x="128" y="321">web · app events</text>
+        </g>
+
+        <!-- Core -->
+        <g text-anchor="middle">
+          <rect class="node-mask" x="276" y="116" width="664" height="44" rx="6"/><rect class="bar" x="276" y="116" width="664" height="44" rx="6"/><rect class="role-box" x="288" y="128" width="32" height="12" rx="2"/><text class="role-text" x="304" y="137">DAG</text><text class="node-name" x="608" y="136">Airflow 3.2</text><text class="node-sub" x="608" y="151">k3s · Celery + K8s executor · ingest · dbt · publish</text>
+          <rect class="node-mask" x="336" y="176" width="224" height="72" rx="6"/><rect class="core-node" x="336" y="176" width="224" height="72" rx="6"/><rect class="role-box focal" x="344" y="184" width="44" height="12" rx="2"/><text class="role-text focal" x="366" y="193">STORE</text><text class="node-name" x="448" y="210">Lakehouse</text><text class="node-sub" x="448" y="226">Trino 480 · Iceberg</text><text class="node-sub" x="448" y="239">RustFS S3 · HMS</text>
+          <rect class="node-mask" x="336" y="264" width="224" height="72" rx="6"/><rect class="plain-node" x="336" y="264" width="224" height="72" rx="6"/><rect class="role-box" x="344" y="272" width="48" height="12" rx="2"/><text class="role-text" x="368" y="281">STREAM</text><text class="node-name" x="448" y="298">Kafka 2.4 + Debezium</text><text class="node-sub" x="448" y="314">Debezium on k3s · CDC</text><text class="node-sub" x="448" y="327">brokers on VM · EOL</text>
+          <rect class="node-mask" x="656" y="176" width="160" height="160" rx="6"/><rect class="core-node" x="656" y="176" width="160" height="160" rx="6"/><rect class="role-box focal" x="664" y="184" width="44" height="12" rx="2"/><text class="role-text focal" x="686" y="193">SERVE</text><text class="node-name" x="736" y="250">ClickHouse 23.5</text><text class="node-sub" x="736" y="266">gold.* · tas.* · cdc</text><text class="node-sub" x="736" y="279">VM · single node</text>
+        </g>
+
+        <!-- Consumers -->
+        <g text-anchor="middle">
+          <rect class="node-mask" x="1000" y="92" width="160" height="64" rx="6"/><rect class="side-node" x="1000" y="92" width="160" height="64" rx="6"/><use href="#ico-chart" transform="translate(1020 124)" style="color:var(--muted)"/><text class="node-name" x="1092" y="116">Dashboards</text><text class="node-sub" x="1092" y="132">Grafana</text><text class="node-sub" x="1092" y="145">TMA · CDP</text>
+          <rect class="node-mask" x="1000" y="180" width="160" height="64" rx="6"/><rect class="side-node" x="1000" y="180" width="160" height="64" rx="6"/><use href="#ico-api" transform="translate(1020 212)" style="color:var(--muted)"/><text class="node-name" x="1092" y="204">amc service</text><text class="node-sub" x="1092" y="220">content-api :9610</text><text class="node-sub" x="1092" y="233">read-only API</text>
+          <rect class="node-mask" x="1000" y="268" width="160" height="64" rx="6"/><rect class="side-node" x="1000" y="268" width="160" height="64" rx="6"/><use href="#ico-notebook" transform="translate(1020 300)" style="color:var(--muted)"/><text class="node-name" x="1092" y="292">Catalog</text><text class="node-sub" x="1092" y="308">OpenMetadata</text><text class="node-sub" x="1092" y="321">→ datalab portal</text>
+        </g>
+
+        <!-- Callout (margin, below the zone) -->
+        <path d="M904 448 Q760 432 736 344" fill="none" stroke="rgba(191,69,32,.5)" stroke-width="1" stroke-dasharray="4,3"/>
+        <circle cx="736" cy="342" r="2" fill="var(--accent)"/>
+        <text class="callout" x="1160" y="456" text-anchor="end">모든 서빙 경로가 단일 ClickHouse 노드로 수렴 — SPOF</text>
+
+        <!-- Legend -->
+        <line x1="40" y1="532" x2="1160" y2="532" stroke="var(--rule)" stroke-width=".8"/>
+        <text class="legend-key" x="40" y="556">TYPE KEY</text>
+        <rect x="128" y="548" width="16" height="12" rx="2" fill="var(--side-fill)" stroke="var(--side-stroke)"/><text class="legend-text" x="152" y="558">Source / consumer</text>
+        <rect x="280" y="548" width="16" height="12" rx="2" fill="var(--accent-tint)" stroke="var(--accent)"/><text class="legend-text" x="304" y="558">Focal platform surface</text>
+        <rect x="448" y="548" width="16" height="12" rx="2" fill="var(--bar-fill)" stroke="var(--zone-stroke)"/><text class="legend-text" x="472" y="558">Orchestration</text>
+        <line x1="580" y1="554" x2="612" y2="554" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrow-accent)"/><text class="legend-text" x="624" y="558">Primary data path</text>
+        <line x1="740" y1="554" x2="772" y2="554" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#arrow)"/><text class="legend-text" x="784" y="558">Ingest path</text>
+        <line x1="880" y1="554" x2="912" y2="554" stroke="var(--muted)" stroke-dasharray="4 3" marker-end="url(#arrow)"/><text class="legend-text" x="924" y="558">DAG trigger</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
